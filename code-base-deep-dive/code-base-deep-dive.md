@@ -240,10 +240,35 @@ Custom assertions for email objects are provided in `MessageExtensions` with the
 Mock implementations of security components are provided to test different security scenarios, such as `VeryTrustingTrustManager` which allows all certificates to pass through and `FakeTrustManager` which conditionally allows a certificate based on a flag. 
 
 ## Backend modules
+The Backend Modules implement protocol-specific functionality, relying only on Mail modules. Three protocols (JMAP, IMAP, and POP3) are supported in their own module, with each module having the same overall structure. Also included are a demo module for non-production demos, as well as a testing module that provides test implementations of `BackendFolder` and `BackendStorage` to reuse across each protocol modules tests.
+
+```mermaid
+graph BT
+    api
+        api --> mail.common
+    demo
+        demo --> api
+    testing
+        testing --> api
+    imap
+        imap --> api
+        imap --> mail.protocols
+    jmap
+        jmap --> api
+    pop3
+        pop3 --> api
+        pop3 --> mail.protocols
+
+    mail.protocols
+    mail.common
 ```
-- Backend Modules implement protocol-specific functionality, relying only on Mail modules.
-```
-The Backend modules `TODO`
+
+The `api` module defines common interfaces for each protocol module to implement, with the main focus being the `Backend` interface. This interface defines methods for syncing, downloading, uploading and deleting messages, among other common functions. It also allows the implementing class to define flags showcasing the protocols support for certain functions, such as uploading data.
+
+The three protocol modules all follow a similar structure:
+- `Command` classes act as use cases, with each command having a single purpose. For example, both `imap` and `pop3` declare a `CommandDownloadMessage` class but with different implementations.
+- `Backend` classes implement the `Backend` interface from the `api` module, with the appropriate flags set based on the protocols supported features and implementation for said features. For example, `Pop3Backend` does not support moving messages, and so marks `supportsMove` as false and `moveMessages()` throws `UnsupportedOperationException`. The majority of the supported features rely on the `Command` classes
+- `Sync` classes provides the concrete implementation of each features synchronization feature. It does not implement any interface, but instead provides methods relevant to the protocols functionality. For example, `ImapSync` provides `sync()` and `downloadMessage()` functions.
 
 ## Core modules
 ```
@@ -281,6 +306,10 @@ As mentioned above, despite serving as a "common" point between the main app mod
 **Legacy modules**
 </br> 
 Even though many of the modules are defined as *legacy* modules, they are still actively used in the app with little to no sign of deprecation. The main entry point of the app (`MessageList`) is located in the `legacy.ui.legacy` module.
+
+**Testing modules**
+</br>
+There are several `testing` modules defined, each of which provides classes to assist with testing, such as assertion extensions or fakes of certain interfaces. These modules are only included as test dependencies via `testImplementation` and allow these files to be reused across multiple modules, rather than having to duplicate code in every module that requires it.
 
 **Logger**
 </br>
