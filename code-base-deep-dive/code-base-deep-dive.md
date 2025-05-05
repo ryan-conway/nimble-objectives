@@ -222,7 +222,7 @@ The three sub-packages here provide protocol-specific implementations for three 
 
 `POP3` is used for download-based email access, meaning that all messages will be downloaded to the device.
 
-`SMTP` is used for sending messages, and thus handles message transmission via `todo add class` as well as formatting and authentication via `todo add class` and `todo add class` respectively.
+`SMTP` is used for sending messages, and thus handles message transmission as well as formatting and authentication via `SmtpTransport`.
 
 ### Testing
 This module provides utilities and helper classes to assist with testing mail related components. Among the many classes, we can note the following key functionalities:
@@ -276,6 +276,22 @@ The three protocol modules all follow a similar structure:
 ```
 The Core modules `TODO`
 
+simplified
+```mermaid
+graph
+    android
+        android --> common
+    mail
+        mail --> common
+    common
+    featureFlags
+    outcome
+    preferences
+    testing
+    ui
+        ui --> testing
+```
+
 ## Other Modules 
 
 ### Core
@@ -298,6 +314,24 @@ The Core modules `TODO`
 **Kotlin/Java**
 </br>
 The project contains a mixture of both Kotlin and Java code, most notably in older modules such as `legacy` and `mail`. As per the [project wiki](https://github.com/thunderbird/thunderbird-android/wiki/CodeStyle#java), all new code is to be written in Kotlin. However, it seems that the migration from Java to Kotlin is done sporadically whenever a contributor works on an issue.
+
+**Usage of Not-null assertion operator**
+</br>
+There are over 100 usages of the double bang (`!!`) operator in the project. While this may be used in cases where the compiler cannot confirm if a variable is null or not despite the developer confirming this with absolute certainty, there are many places where there is no null check in place. For example, take the `SmtpTransport` class:
+
+```kotlin
+class SmtpTransport(
+    //...
+    private val oauthTokenProvider: OAuth2TokenProvider?,
+) {
+    private fun attempOAuth(method: OAuthMethod, username: String) {
+        val token = oauthTokenProvider!!.getToken(OAuth2TokenProvider.OAUTH2_TIMEOUT.toLong())
+    
+    }
+}
+```
+
+There is no null check made, so if the token provider is null for any reason, this will throw a `RuntimeException` resulting in a crash.
 
 **App Common**
 </br>
