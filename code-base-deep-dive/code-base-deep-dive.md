@@ -276,7 +276,6 @@ The three protocol modules all follow a similar structure:
 ```
 The Core modules `TODO`
 
-simplified
 ```mermaid
 graph
     android
@@ -292,10 +291,32 @@ graph
         ui --> testing
 ```
 
-## Other Modules 
+### Android
 
-### Core
-`TODO`
+### Common
+
+### Feature Flags
+
+### Mail
+
+### Outcome
+
+### Preferences
+
+### Testing
+
+As with other testing modules, this module only provides test related code for reuse, namely assertion extensions to simplify tests as well as a `Clock` implementation.
+
+### UI
+
+This module 
+
+There are three UI module groups, each of which serves a separate purpose. 
+- `compose` provides `TODO xxx`. 
+- `legacy` provides `TODO xxx`.
+- `theme` provides `TODO xxx`.
+
+## Other Modules 
 
 ### CLI
 `TODO`
@@ -326,7 +347,7 @@ class SmtpTransport(
 ) {
     private fun attempOAuth(method: OAuthMethod, username: String) {
         val token = oauthTokenProvider!!.getToken(OAuth2TokenProvider.OAUTH2_TIMEOUT.toLong())
-    
+        //...
     }
 }
 ```
@@ -343,7 +364,28 @@ Even though many of the modules are defined as *legacy* modules, they are still 
 
 **Testing modules**
 </br>
-There are several `testing` modules defined, each of which provides classes to assist with testing, such as assertion extensions or fakes of certain interfaces. These modules are only included as test dependencies via `testImplementation` and allow these files to be reused across multiple modules, rather than having to duplicate code in every module that requires it.
+There are several `testing` modules defined, each of which provides classes to assist with testing, such as assertion extensions or fakes of certain interfaces. These modules are only included as test dependencies via `testImplementation` and allow these files to be reused across multiple modules, rather than having to duplicate code in every module/test that requires it. For example, `core.testing` provides the following List assertion extension:
+
+```kotlin
+fun <T> Assert<List<T>>.containsNoDuplicates() = given { actual ->
+    val seen: MutableSet<T> = mutableSetOf()
+    val duplicates = actual.filter { !seen.add(it) }
+    if (duplicates.isNotEmpty()) {
+        expected("to contain no duplicates but found: ${show(duplicates)}")
+    }
+}
+```
+
+This allows for writing simpler tests such as:
+```kotlin
+// NotificationIdsTest.kt
+@Test
+fun `all general notification IDs are unique`() {
+    val notificationIds = getGeneralNotificationIds()
+
+    assertThat(notificationIds).containsNoDuplicates()
+}
+```
 
 **Logger**
 </br>
@@ -375,6 +417,36 @@ flowchart LR
     done[End]
 ```
 
+**Clock**
+</br>
+The app makes use of the `Clock` interface from the [`kotlinx.datetime`](https://github.com/Kotlin/kotlinx-datetime) library for time-related code. This allows for simpler testing by allowing the usage of fake clocks rather than having to mock static methods (e.g., `LocalDateTime` from `java.time` library) for each test group. For example, if we were to test an expiring cache:
+
+```kotlin
+// With Clock
+Class TestClock(var currentTime: Instant = Clock.System.now()) {
+    fun changeTime(time: Instant) { currentTime = time }
+    fun advanceTime(duration: Duration) { currentTime += duration }
+}
+
+@Test
+fun `cache expires after 5 minutes`() {
+    val clock: Clock = TestClock()
+    val cache = Cache(clock)
+    clock.advanceTime(Duration.minutes(5))
+    assertThat(cache.isExpired).isTrue()
+}
+
+// With LocalDateTime
+@Test
+fun `cache expires after 5 minutes`() {
+    mockkStatic(LocalDateTime::class)
+    every { LocalDateTime.now() } returns LocalDateTime.of(2024, 3, 7, 9, 15, 0)
+    val cache = Cache(expiresAt = LocalDateTime.now().plusMinutes(5))
+    every { LocalDateTime.now() } returns LocalDateTime.of(2024, 3, 7, 9, 21, 0)
+    assertThat(cache.isExpired).isTrue()
+}
+```
+
 **PreviewDevices**
 </br>
 Annotation class to collate multipe preview annotations into one, allowing previews to show their layouts on multiple devices from small phones up to desktop size screens. `TODO expand on benefits`
@@ -404,6 +476,58 @@ Wrapper to adapt content to multiple screen sizes `TODO expand on benefits`
 
 
 
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
+
+a
 
 a
 
