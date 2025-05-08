@@ -309,12 +309,17 @@ As with other testing modules, this module only provides test related code for r
 
 ### UI
 
-This module 
+This module provides UI for both legacy XML approaches and the modern Jetpack Compose approach. 
 
-There are three UI module groups, each of which serves a separate purpose. 
-- `compose` provides `TODO xxx`. 
-- `legacy` provides `TODO xxx`.
-- `theme` provides `TODO xxx`.
+For Legacy UI, the module provides an `Icons` object to wrap the XML icons into a more readable format, as well as XML files containing the theme data for both k9mail and thunderbird.
+
+For Jetpack Compose, the module provides much more utility. Compared to the relatively barebones Legacy UI module, this module provides:
+
+- A deep theming scheme following Material Design principles (e.g., shapes and elevation)
+- Composable components in multiple tiers:
+  - **Atoms** are composables at the smallest level: Buttons, Text, Images, etc.
+  - **Molecules** are composables that are slightly more complex than atoms: They generally combine multple atoms into a single reusable component such as `CheckboxInput`.
+  - **Organisms** are generally more complex than molecules and typically override from Material components, such as `AlertDialog` or `NavigationDrawerItem`
 
 ## Other Modules 
 
@@ -332,12 +337,14 @@ There are three UI module groups, each of which serves a separate purpose.
 
 # Points of Interest
 
-**Kotlin/Java**
-</br>
+## Kotlin
+
+### Java Usage
+
 The project contains a mixture of both Kotlin and Java code, most notably in older modules such as `legacy` and `mail`. As per the [project wiki](https://github.com/thunderbird/thunderbird-android/wiki/CodeStyle#java), all new code is to be written in Kotlin. However, it seems that the migration from Java to Kotlin is done sporadically whenever a contributor works on an issue.
 
-**Usage of Not-null assertion operator**
-</br>
+### Usage of Not-null assertion operator
+
 There are over 100 usages of the double bang (`!!`) operator in the project. While this may be used in cases where the compiler cannot confirm if a variable is null or not despite the developer confirming this with absolute certainty, there are many places where there is no null check in place. For example, take the `SmtpTransport` class:
 
 ```kotlin
@@ -354,16 +361,18 @@ class SmtpTransport(
 
 There is no null check made, so if the token provider is null for any reason, this will throw a `RuntimeException` resulting in a crash.
 
-**App Common**
-</br>
+## Modules
+
+### App Common
+
 As mentioned above, despite serving as a "common" point between the main app modules, all the code in this module could be migrated to the `feature/account` module instead, rendering this module redundant.
 
-**Legacy modules**
-</br> 
+### Legacy modules
+
 Even though many of the modules are defined as *legacy* modules, they are still actively used in the app with little to no sign of deprecation. The main entry point of the app (`MessageList`) is located in the `legacy.ui.legacy` module.
 
-**Testing modules**
-</br>
+### Testing modules
+
 There are several `testing` modules defined, each of which provides classes to assist with testing, such as assertion extensions or fakes of certain interfaces. These modules are only included as test dependencies via `testImplementation` and allow these files to be reused across multiple modules, rather than having to duplicate code in every module/test that requires it. For example, `core.testing` provides the following List assertion extension:
 
 ```kotlin
@@ -387,12 +396,14 @@ fun `all general notification IDs are unique`() {
 }
 ```
 
-**Logger**
-</br>
+## Specific Classes and Files
+
+### Logger
+
 The projects provides an interface `Logger` as an abstraction for it's logging purposes. Many projects make use of `Timber`, but this does not work on non-Android modules. The `Logger` interface allows the project to supply different logging implementations to work around this issue, such as `SystemOutLogger`. There is also a fake `Timber` object whose purpose is to temporarily handle the logging with the minimal amount of code change (i.e., updating only the import on relevant files) until Timber supports non-Android classes, but this seems unlikely as the project hasn't had any feature updates [since 2021](https://github.com/JakeWharton/timber/releases).
 
-**RealImapFolderIdler**
-</br>
+### RealImapFolderIdler
+
 This class implements IMAP's IDLE command, which is a feature that defines how real-time notifications are received by the client. The general flow of the logic is as follows:
 
 ```mermaid
@@ -417,8 +428,7 @@ flowchart LR
     done[End]
 ```
 
-**Clock**
-</br>
+### Clock
 The app makes use of the `Clock` interface from the [`kotlinx.datetime`](https://github.com/Kotlin/kotlinx-datetime) library for time-related code. This allows for simpler testing by allowing the usage of fake clocks rather than having to mock static methods (e.g., `LocalDateTime` from `java.time` library) for each test group. For example, if we were to test an expiring cache:
 
 ```kotlin
@@ -447,12 +457,20 @@ fun `cache expires after 5 minutes`() {
 }
 ```
 
-**PreviewDevices**
-</br>
+## Jetpack Compose
+
+The project presents multiple interesting Jetpack Compose design choices. The most notable are described below:
+
+### Previews
+
+Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. This means that when we build the `release` version of the app, no previews are included in the final APK, resulting in both smaller file sizes and more secure code. `TODO find preview thing from android template`
+
+### PreviewDevices
+
 Annotation class to collate multipe preview annotations into one, allowing previews to show their layouts on multiple devices from small phones up to desktop size screens. `TODO expand on benefits`
 
-**ResponsiveContent**
-</br> 
+### ResponsiveContent
+
 Wrapper to adapt content to multiple screen sizes `TODO expand on benefits`
 
 # Conclusion
