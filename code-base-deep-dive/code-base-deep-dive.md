@@ -26,11 +26,9 @@ The following software must also be available:
 The project may be checked out via GitHub CLI or any Git GUI
 
 ### GitHub CLI
-
 `$ gh repo clone thunderbird/thunderbird-android`
 
 ### Android Studio
-
 <img src="assets/android_studio_vcs.png">
 
 # Project Structure
@@ -79,7 +77,7 @@ graph LR
     Plugins["Plugin Modules"] 
 ```
 
-The most major modules to note are the App, Legacy, Feature, Backend and Core modules.
+The most major modules to note are the App, Legacy, Feature, Backend and Mail modules.
 
 `TODO deeper dive into overall structure?`
 
@@ -212,31 +210,23 @@ The app supports the MIME standard and provides many helper classes for handling
 #### Logging
 Despite not being related to mail, this module also provides the `Logger` abstraction, to allow using different logger implementations in different environments (e.g., Timber and `System.out`).
 
-#### 
-
 ### Protocols
-
 The three sub-packages here provide protocol-specific implementations for three major email protocols: `IMAP`, `POP3` and `SMTP`.
 
-`IMAP` is used for synchronization-based email access, meaning that all messages and their associated states are kept on the server. This module add support for synchronization via `RealImapFolder` and push notifications via `RealImapFolderIdler`.
-
-`POP3` is used for download-based email access, meaning that all messages will be downloaded to the device.
-
-`SMTP` is used for sending messages, and thus handles message transmission as well as formatting and authentication via `SmtpTransport`.
+- `IMAP` is used for synchronization-based email access, meaning that all messages and their associated states are kept on the server. This module add support for synchronization via `RealImapFolder` and push notifications via `RealImapFolderIdler`.
+- `POP3` is used for download-based email access, meaning that all messages will be downloaded to the device.
+- `SMTP` is used for sending messages, and thus handles message transmission as well as formatting and authentication via `SmtpTransport`.
 
 ### Testing
 This module provides utilities and helper classes to assist with testing mail related components. Among the many classes, we can note the following key functionalities:
 
-**Test Message Creation**
-</br>
+#### Test Message Creation
 The module provides both a mock message implementation `TestMessage` as well as builders and DSLs (`TestMessageBuilder` and `buildMessage()`) for creating test messages.
 
-**Mail-Specific Testing Tools**
-</br>
+#### Mail-Specific Testing Tools
 Custom assertions for email objects are provided in `MessageExtensions` with the aim of simplifying the tests. String helper utilities are also provided in the base package to handle linebreaks in messages.
 
-**Security Testing Support**
-</br>
+#### Security Testing Support
 Mock implementations of security components are provided to test different security scenarios, such as `VeryTrustingTrustManager` which allows all certificates to pass through and `FakeTrustManager` which conditionally allows a certificate based on a flag. 
 
 ## Backend modules
@@ -271,11 +261,6 @@ The three protocol modules all follow a similar structure:
 - `Sync` classes provides the concrete implementation of each features synchronization feature. It does not implement any interface, but instead provides methods relevant to the protocols functionality. For example, `ImapSync` provides `sync()` and `downloadMessage()` functions.
 
 ## Core modules
-```
-- Core Modules provide essential services used by nearly all other module groups.
-```
-The Core modules `TODO`
-
 ```mermaid
 graph
     android
@@ -292,23 +277,21 @@ graph
 ```
 
 ### Android
+`TODO`
 
 ### Common
+`TODO`
 
 ### Feature Flags
+This module defines a structure for defining feature flags in the app. The feature flags are declared per module by implementing the `FeatureFlagFactory` interface. `TODO expand`
 
 ### Mail
+This module contains classes that hold folder information, as well as an enum defining a mail server direction. However, there are two major issues with this module:
 
-### Outcome
-
-### Preferences
-
-### Testing
-
-As with other testing modules, this module only provides test related code for reuse, namely assertion extensions to simplify tests as well as a `Clock` implementation.
+1. The `MailServerDirection` enum is only used in one place ( `LocalKeyStoreManager`) and even then the related functions are never called anywhere. This enum can thus be removed without any issue, along with the unused keystore manager functions.
+2. The folder classes may be moved to the `feature/folder` module to consolidate related features in one place.
 
 ### UI
-
 This module provides UI for both legacy XML approaches and the modern Jetpack Compose approach. 
 
 For Legacy UI, the module provides an `Icons` object to wrap the XML icons into a more readable format, as well as XML files containing the theme data for both k9mail and thunderbird.
@@ -320,6 +303,10 @@ For Jetpack Compose, the module provides much more utility. Compared to the rela
   - **Atoms** are composables at the smallest level: Buttons, Text, Images, etc.
   - **Molecules** are composables that are slightly more complex than atoms: They generally combine multple atoms into a single reusable component such as `CheckboxInput`.
   - **Organisms** are generally more complex than molecules and typically override from Material components, such as `AlertDialog` or `NavigationDrawerItem`
+- Extensions and utility methods to assist with composable styling, previews, preferences and navigation
+
+### Others
+There are several other minor though equally important submodules in the `core` module. The `preferences` module is concerned with user settings storage. The `outcome` module provides an `Outcome` wrapper class to identify success and failure states (Similar to Kotlin's `Result` class). The `testing` module provides test utilities similar to the other test modules.
 
 ## Other Modules 
 
@@ -340,11 +327,9 @@ For Jetpack Compose, the module provides much more utility. Compared to the rela
 ## Kotlin
 
 ### Java Usage
-
 The project contains a mixture of both Kotlin and Java code, most notably in older modules such as `legacy` and `mail`. As per the [project wiki](https://github.com/thunderbird/thunderbird-android/wiki/CodeStyle#java), all new code is to be written in Kotlin. However, it seems that the migration from Java to Kotlin is done sporadically whenever a contributor works on an issue.
 
 ### Usage of Not-null assertion operator
-
 There are over 100 usages of the double bang (`!!`) operator in the project. While this may be used in cases where the compiler cannot confirm if a variable is null or not despite the developer confirming this with absolute certainty, there are many places where there is no null check in place. For example, take the `SmtpTransport` class:
 
 ```kotlin
@@ -359,20 +344,17 @@ class SmtpTransport(
 }
 ```
 
-There is no null check made, so if the token provider is null for any reason, this will throw a `RuntimeException` resulting in a crash.
+There is no null check made, so if the token provider is null for any reason, this will throw a `RuntimeException` resulting in a crash. As an improvement for this case, we should either use a null-safety operator (`oauthTokenProvider?.getToken`) or make `oauthTokenProvider` non-null to enforce null safety.
 
 ## Modules
 
 ### App Common
-
 As mentioned above, despite serving as a "common" point between the main app modules, all the code in this module could be migrated to the `feature/account` module instead, rendering this module redundant.
 
 ### Legacy modules
-
 Even though many of the modules are defined as *legacy* modules, they are still actively used in the app with little to no sign of deprecation. The main entry point of the app (`MessageList`) is located in the `legacy.ui.legacy` module.
 
 ### Testing modules
-
 There are several `testing` modules defined, each of which provides classes to assist with testing, such as assertion extensions or fakes of certain interfaces. These modules are only included as test dependencies via `testImplementation` and allow these files to be reused across multiple modules, rather than having to duplicate code in every module/test that requires it. For example, `core.testing` provides the following List assertion extension:
 
 ```kotlin
@@ -399,11 +381,9 @@ fun `all general notification IDs are unique`() {
 ## Specific Classes and Files
 
 ### Logger
-
 The projects provides an interface `Logger` as an abstraction for it's logging purposes. Many projects make use of `Timber`, but this does not work on non-Android modules. The `Logger` interface allows the project to supply different logging implementations to work around this issue, such as `SystemOutLogger`. There is also a fake `Timber` object whose purpose is to temporarily handle the logging with the minimal amount of code change (i.e., updating only the import on relevant files) until Timber supports non-Android classes, but this seems unlikely as the project hasn't had any feature updates [since 2021](https://github.com/JakeWharton/timber/releases).
 
 ### RealImapFolderIdler
-
 This class implements IMAP's IDLE command, which is a feature that defines how real-time notifications are received by the client. The general flow of the logic is as follows:
 
 ```mermaid
@@ -458,23 +438,18 @@ fun `cache expires after 5 minutes`() {
 ```
 
 ## Jetpack Compose
-
 The project presents multiple interesting Jetpack Compose design choices. The most notable are described below:
 
 ### Previews
-
 Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. This means that when we build the `release` version of the app, no previews are included in the final APK, resulting in both smaller file sizes and more secure code. `TODO find preview thing from android template`
 
 ### PreviewDevices
-
 Annotation class to collate multipe preview annotations into one, allowing previews to show their layouts on multiple devices from small phones up to desktop size screens. `TODO expand on benefits`
 
 ### ResponsiveContent
-
 Wrapper to adapt content to multiple screen sizes `TODO expand on benefits`
 
 # Conclusion
-
 `>> TODO: Summarize above content and draw conclusion`
 
 
