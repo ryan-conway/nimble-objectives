@@ -317,7 +317,11 @@ There are several other minor though equally important submodules in the `core` 
 `TODO`
 
 ### Library
-`TODO`
+This module contains two submodules: `html-cleaner` and `TokenAutoComplete`
+
+`html-cleaner` is as the module name implies: It is a utility library whose function is to sanitize, or _clean_, HTML input by only allowing a whitelist of tags to remain in the outputted HTML. It makes use of the [`jsoup`](https://github.com/jhy/jsoup) HTML Parser library to facilitate the cleaning.
+
+`TokenAutoComplete` is a fork of [Splitwise's TokenAutoComplete library](https://github.com/splitwise/TokenAutoComplete). Its purpose is to convert text into user-interactable tokens, such as email addresses in the email recipient field.
 
 ### Plugin
 `TODO`
