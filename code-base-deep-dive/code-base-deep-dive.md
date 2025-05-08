@@ -79,10 +79,6 @@ graph LR
 
 The most major modules to note are the App, Legacy, Feature, Backend and Mail modules.
 
-`TODO deeper dive into overall structure?`
-
-# Modules
-
 ## App modules
 The App modules, which serve as the entry points or highest level of the app architecture, depend on all other modules both directly and indirectly. They are responsible for defining which features are presented to the users and how the dependency tree is built.
 
@@ -442,7 +438,6 @@ fun `cache expires after 5 minutes`() {
 ```
 
 ## Jetpack Compose
-The project presents multiple interesting Jetpack Compose design choices. The most notable are described below:
 
 ### Previews
 Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. This means that when we build the `release` version of the app, no previews are included in the final APK, resulting in both smaller file sizes and more secure code. `TODO find preview thing from android template`
