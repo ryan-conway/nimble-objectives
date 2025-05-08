@@ -307,7 +307,12 @@ There are several other minor though equally important submodules in the `core` 
 ## Other Modules 
 
 ### CLI
-`TODO`
+This module provides multiple command-line utilities, most likely to assist with development tasks. Each module makes use of the [Clikt](https://ajalt.github.io/clikt/) library to simplify command-line development.
+
+- `autodiscovery`: Fetches mail server settings for a given email address
+- `html-cleaner`: Sanitizes HTML input via the `library/html-cleaner` module.
+- `resource-mover`: Move string resources from one module to another.
+- `translation`: Track translation completion progress and supported languages.
 
 ### UI Utils
 `TODO`
