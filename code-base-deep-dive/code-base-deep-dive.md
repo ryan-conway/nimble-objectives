@@ -440,13 +440,17 @@ fun `cache expires after 5 minutes`() {
 ## Jetpack Compose
 
 ### Previews
-Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. This means that when we build the `release` version of the app, no previews are included in the final APK, resulting in both smaller file sizes and more secure code. `TODO find preview thing from android template`
+Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. This means that when we build the `release` version of the app, no previews are included in the final APK, resulting in smaller file sizes.
 
 ### PreviewDevices
-Annotation class to collate multipe preview annotations into one, allowing previews to show their layouts on multiple devices from small phones up to desktop size screens. `TODO expand on benefits`
+Annotation class to collate multipe preview annotations into one, allowing previews to show their layouts on multiple devices from small phones up to desktop size screens. This allows the developer to apply one preview annotation and output multiple previews.
+
+<img src="assets/preview_devices.png">
 
 ### ResponsiveContent
-Wrapper to adapt content to multiple screen sizes `TODO expand on benefits`
+Wrapper to adapt content to multiple screen sizes. This allows for the appropriate placement of content on multiple screen sizes when that content is not designed to occupy the full screen size, such as the Welcome Screen
+
+<img src="assets/responsive_content_welcome.png">
 
 # Conclusion
 `>> TODO: Summarize above content and draw conclusion`
