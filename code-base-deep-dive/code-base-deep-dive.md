@@ -276,7 +276,17 @@ graph
 `TODO`
 
 ### Common
-`TODO`
+This module provides commonly used structures and utilities to be used throughout the project:
+
+- `cache` provides a generic caching mechanism along with three implementations:
+  - `ExpiringCache` clears its data after a set period.
+  - `InMemoryCache` only holds data for the lifecycle of the app
+  - `SynchronizedCache` is a wrapper over other caches to implement thread safe operations.
+- `validation` provides abstractions for validation results, similar to Kotlin's `Result` class.
+- `mail` provides e-mail address and domain data classes, as well as constants for e-mail protocols and common tokens. These can all be migrated to the `mail` module to organize related components together.
+- `net` provides value class to wrap values into validated Domain, Host and Port classes.
+- `oauth` provides classes to represent OAuth configurations as well as relevant factory and provider interfaces.
+- `provider` provides interfaces to allow the apps to provide basic information such as app name and brand name.
 
 ### Feature Flags
 This module defines a structure for defining feature flags in the app. The feature flags are declared per module by implementing the `FeatureFlagFactory` interface. One thing to note is that keys for the flags are not explicitly defined, meaning the implementing class can create as many keys as they want with whatever name they desire. This allows for more flexibility from the factory side, but also means that when checking the flags for a specified feature, the caller does not have any reference for if a key exists or not.
