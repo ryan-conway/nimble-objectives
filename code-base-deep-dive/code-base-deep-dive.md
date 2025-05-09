@@ -340,7 +340,11 @@ This module provides multiple command-line utilities, most likely to assist with
 - `translation`: Track translation completion progress and supported languages.
 
 ### UI Utils
-`TODO`
+This module provides customized versions of specific AndroidX components to support Thunderbirds specific requirements.
+
+- `ItemTouchHelper` is a fork of RecyclerView's `ItemTouchHelper` to support swipe gestures that do not remove the swiped item in a list
+- `LinearLayoutManager` is a fork of RecyclerView's `LinearLayoutManager` to update the anchored view when the list is currently scrolled to the top and a new item is added to the top of the list. The existing `LinearLayoutManager` retains the same scroll position, so the new item won't be immediately visible.
+- `ToolbarBottomSheet` is a fork of `BottomSheetDialogFragment` to support showing a Toolbar when the sheet if fully expanded.
 
 ### Library
 This module contains two submodules: `html-cleaner` and `TokenAutoComplete`
