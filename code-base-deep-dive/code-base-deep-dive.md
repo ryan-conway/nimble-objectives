@@ -34,6 +34,8 @@ The project may be checked out via GitHub CLI or any Git GUI
 # Project Structure
 
 ## Architecture
+The project makes use of a very modular architecture that seems to be evolving over time. There are multiple module groups, many of which have their own heirarchy of submodules, and the details of which shall be discussed in more detail below. An overview of the project architecture showcasing the highest level modules is as follows:
+
 ```mermaid
 ---
 config:
@@ -81,6 +83,20 @@ The most major modules to note are the App, Legacy, Feature, Backend and Mail mo
 
 ## App modules
 The App modules, which serve as the entry points or highest level of the app architecture, depend on all other modules both directly and indirectly. They are responsible for defining which features are presented to the users and how the dependency tree is built.
+
+```mermaid
+---
+config:
+  layout: elk
+---
+graph
+    app-thunderbird
+    app-k9mail
+    app-catalog
+    app-common
+        app-k9mail --> app-common
+        app-thunderbird --> app-common
+```
 
 `app-thunderbird` is the primary module for running the app, and contains all the features of the app alongside the Thunderbird theme. The `ThunderbirdApp` application class overrides from `CommonApp` defined in the `legacy.common` module and has additional telemetry initialization.
 
@@ -171,7 +187,27 @@ graph
 `TODO expand on features?`
 
 ## Mail modules
-The Mail modules are the most foundational modules of the app, responsible for handling mail messages and interacting with different email protocols.
+The Mail modules are the most foundational modules of the app, responsible for handling mail messages and interacting with different email protocols
+
+```mermaid
+---
+config:
+  layout: elk
+---
+graph
+    common
+    subgraph protocols
+        imap
+        pop3
+        smtp
+    end
+    testing
+
+    imap --> common
+    pop3 --> common
+    smtp --> common
+    testing --> common
+```
 
 ### Common
 `mail.common` may be considered the single most foundational module of the app, providing a base on which to build higher level functionality. This module provides the following features:
@@ -253,11 +289,15 @@ The `api` module defines common interfaces for each protocol module to implement
 
 The three protocol modules all follow a similar structure:
 - `Command` classes act as use cases, with each command having a single purpose. For example, both `imap` and `pop3` declare a `CommandDownloadMessage` class but with different implementations.
-- `Backend` classes implement the `Backend` interface from the `api` module, with the appropriate flags set based on the protocols supported features and implementation for said features. For example, `Pop3Backend` does not support moving messages, and so marks `supportsMove` as false and `moveMessages()` throws `UnsupportedOperationException`. The majority of the supported features rely on the `Command` classes
+- `Backend` classes implement the `Backend` interface from the `api` module, with the appropriate flags set based on the protocols supported features and implementation for said features. For example, `Pop3Backend` does not support moving messages, and so marks `supportsMove` as false and `moveMessages()` throws `UnsupportedOperationException`. The majority of the supported features rely on the `Command` classes.
 - `Sync` classes provides the concrete implementation of each features synchronization feature. It does not implement any interface, but instead provides methods relevant to the protocols functionality. For example, `ImapSync` provides `sync()` and `downloadMessage()` functions.
 
 ## Core modules
 ```mermaid
+---
+config:
+  layout: elk
+---
 graph
     android
         android --> common
@@ -276,7 +316,7 @@ graph
 `TODO`
 This module provides Android platform specific functionality that relies on Android APIs. The following features are implemented:
 
-- `common` 
+- `common` provides several Android-related 
 - `logging` allows writing logs to local files.
 - `network` provides a simplified wrapper over Android's `ConnectivityManager` class to handle network state monitoring, with handling for multiple different versions of Android.
 - `permissions` provides a simplified abstraction for checking the state of Android permissions. 
@@ -347,6 +387,39 @@ For Jetpack Compose, the module provides much more utility. Compared to the rela
 There are several other minor though equally important submodules in the `core` module. The `preferences` module is concerned with user settings storage. The `outcome` module provides an `Outcome` wrapper class to identify success and failure states (Similar to Kotlin's `Result` class). The `testing` module provides test utilities similar to the other test modules.
 
 ## Other Modules 
+The following module groups below each contain their own submodules, and each submodule is completely isolated from all other modules in the project with the exception of `cli/html-cleaner`, which relies on `library/html-cleaner`
+
+```mermaid
+---
+config:
+  layout: elk
+---
+graph
+    subgraph cli
+        direction TB
+        autodiscovery
+        cli-html-cleaner[html-cleaner]
+        resource-mover
+        translation
+    end
+    subgraph ui-utils
+        direction TB
+        ItemTouchHelper
+        LinearLayoutManager
+        ToolbarBottomSheet
+    end
+    subgraph library
+        direction TB
+        lib-html-cleaner[html-cleaner]
+        TokenAutoComplete
+
+        cli-html-cleaner --> lib-html-cleaner
+    end
+    subgraph plugins
+        direction TB
+        openpgp-api-lib
+    end
+```
 
 ### CLI
 This module provides multiple command-line utilities, most likely to assist with development tasks. Each module makes use of the [Clikt](https://ajalt.github.io/clikt/) library to simplify command-line development.
@@ -502,7 +575,7 @@ Annotation class to collate multipe preview annotations into one, allowing previ
 <img src="assets/preview_devices.png">
 
 ### ResponsiveContent / ResponsiveWidthContainer
-Wrapper to adapt content to multiple screen sizes. This allows for the appropriate placement of content on multiple screen sizes when that content is not designed to occupy the full screen size, such as the Welcome Screen. The available screen size classes are defined by the `WindowSizeClass` enum
+Wrappers to adapt content to multiple screen sizes. This allows for the appropriate placement of content on multiple screen sizes when that content is not designed to occupy the full screen size, such as the Welcome Screen. The available screen size classes are defined by the `WindowSizeClass` enum
 
 <img src="assets/responsive_content_welcome.png">
 
