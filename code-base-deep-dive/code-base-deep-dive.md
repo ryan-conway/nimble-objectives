@@ -501,8 +501,8 @@ Annotation class to collate multipe preview annotations into one, allowing previ
 
 <img src="assets/preview_devices.png">
 
-### ResponsiveContent
-Wrapper to adapt content to multiple screen sizes. This allows for the appropriate placement of content on multiple screen sizes when that content is not designed to occupy the full screen size, such as the Welcome Screen
+### ResponsiveContent / ResponsiveWidthContainer
+Wrapper to adapt content to multiple screen sizes. This allows for the appropriate placement of content on multiple screen sizes when that content is not designed to occupy the full screen size, such as the Welcome Screen. The available screen size classes are defined by the `WindowSizeClass` enum
 
 <img src="assets/responsive_content_welcome.png">
 
