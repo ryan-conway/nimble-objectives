@@ -279,7 +279,32 @@ graph
 `TODO`
 
 ### Feature Flags
-This module defines a structure for defining feature flags in the app. The feature flags are declared per module by implementing the `FeatureFlagFactory` interface. `TODO expand`
+This module defines a structure for defining feature flags in the app. The feature flags are declared per module by implementing the `FeatureFlagFactory` interface. One thing to note is that keys for the flags are not explicitly defined, meaning the implementing class can create as many keys as they want with whatever name they desire. This allows for more flexibility from the factory side, but also means that when checking the flags for a specified feature, the caller does not have any reference for if a key exists or not.
+
+```kotlin
+// Feature Flag provider
+class TbFeatureFlagFactory : FeatureFlagFactory {
+    override fun createFeatureCatalog(): List<FeatureFlag> {
+        return listOf(
+            FeatureFlag("archive_marks_as_read".toFeatureFlagKey(), enabled = true),
+            // ...
+        )
+    }
+}
+
+// Feature Flag caller
+// ArchiveOperations.kt
+private fun archiveMessages() {
+    val operation = featureFlagProvider
+        // How can we verify that this is a valid feature flag?
+        .provide("archive_marks_as_read".toFeatureFlagKey())
+        .whenEnabledOrNot(
+            onEnabled = { MoveOrCopyFlavor.MOVE_AND_MARK_AS_READ },
+            onDisabledOrUnavailable = { MoveOrCopyFlavor.MOVE },
+        )
+    // ...
+}
+```
 
 ### Mail
 This module contains classes that hold folder information, as well as an enum defining a mail server direction. However, there are two major issues with this module:
@@ -309,7 +334,7 @@ There are several other minor though equally important submodules in the `core` 
 ### CLI
 This module provides multiple command-line utilities, most likely to assist with development tasks. Each module makes use of the [Clikt](https://ajalt.github.io/clikt/) library to simplify command-line development.
 
-- `autodiscovery`: Fetches mail server settings for a given email address
+- `autodiscovery`: Fetches mail server settings for a given email address.
 - `html-cleaner`: Sanitizes HTML input via the `library/html-cleaner` module.
 - `resource-mover`: Move string resources from one module to another.
 - `translation`: Track translation completion progress and supported languages.
