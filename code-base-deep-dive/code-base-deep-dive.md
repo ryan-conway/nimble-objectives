@@ -1,5 +1,5 @@
 # Introduction
-This document serves as an overview of Thunderbird Android's code base. It will analyze the project architecture and evaluate technical decisions and points of interest.
+This document serves as an overview of Thunderbird Android's code base as of commit [`045181a`](https://github.com/thunderbird/thunderbird-android/tree/045181ab5486297882b4b53e9f1a0a2a9a89fa62). It will analyze the project architecture and evaluate technical decisions and points of interest.
 
 # Project Overview
 [Thunderbird Android](https://github.com/thunderbird/thunderbird-android) is an Android mail client that allows users to manage multiple email accounts at once, including a unified inbox to collate all emails into one list. It is the successor to K-9 mail.
@@ -274,6 +274,13 @@ graph
 
 ### Android
 `TODO`
+This module provides Android platform specific functionality that relies on Android APIs. The following features are implemented:
+
+- `common` 
+- `logging` allows writing logs to local files.
+- `network` provides a simplified wrapper over Android's `ConnectivityManager` class to handle network state monitoring, with handling for multiple different versions of Android.
+- `permissions` provides a simplified abstraction for checking the state of Android permissions. 
+- `testing` provides a `Robolectric` abstraction to support tests that rely on Android functionality, such as testing URIs. 
 
 ### Common
 This module provides commonly used structures and utilities to be used throughout the project:
