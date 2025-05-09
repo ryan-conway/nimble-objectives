@@ -466,7 +466,8 @@ The app makes use of the `Clock` interface from the [`kotlinx.datetime`](https:/
 
 ```kotlin
 // With Clock
-Class TestClock(var currentTime: Instant = Clock.System.now()) {
+Class TestClock(var currentTime: Instant = Clock.System.now()): Clock {
+    override fun now(): Instant = currentTime
     fun changeTime(time: Instant) { currentTime = time }
     fun advanceTime(duration: Duration) { currentTime += duration }
 }
