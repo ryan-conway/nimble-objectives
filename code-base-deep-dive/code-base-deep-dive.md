@@ -354,7 +354,7 @@ This module provides multiple command-line utilities, most likely to assist with
 - `autodiscovery`: Fetches mail server settings for a given email address.
 - `html-cleaner`: Sanitizes HTML input via the `library/html-cleaner` module.
 - `resource-mover`: Move string resources from one module to another.
-- `translation`: Track translation completion progress and supported languages.
+- `translation`: Track translation completion progress and supported languages. The translation is handled by [Weblate](https://weblate.org/en/).
 
 ### UI Utils
 This module provides customized versions of specific AndroidX components to support Thunderbirds specific requirements.
