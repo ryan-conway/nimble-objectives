@@ -349,8 +349,10 @@ This module contains two submodules: `html-cleaner` and `TokenAutoComplete`
 
 `TokenAutoComplete` is a fork of [Splitwise's TokenAutoComplete library](https://github.com/splitwise/TokenAutoComplete). Its purpose is to convert text into user-interactable tokens, such as email addresses in the email recipient field.
 
-### Plugin
-`TODO`
+### Plugins
+The plugins module contains only one submodule: `openpgp-api`, which is an implementation of the [OpenPGP standard](https://www.openpgp.org/) for encrypting and decrypting e-mails.
+
+One notable issue with this module is the lifecycle awareness implementation of `OpenPgpApiManager`. It currently implements the `LifeCycleObserver` interface which is not recommended; instead it shoud implement either `DefaultLifeCycleObserver` to handle all events, or `LifecycleEventObserver` to handle specific events. It also annotates certain methods with the deprecated `@OnLifecycleEvent`, resulting in the lifecycle methods potentially not getting called.
 
 # Points of Interest
 
