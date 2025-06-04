@@ -313,7 +313,6 @@ graph
 ```
 
 ### Android
-`TODO`
 This module provides Android platform specific functionality that relies on Android APIs. The following features are implemented:
 
 - `common` provides several Android-related 
