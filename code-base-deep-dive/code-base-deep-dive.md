@@ -315,7 +315,7 @@ graph
 ### Android
 This module provides Android platform specific functionality that relies on Android APIs. The following features are implemented:
 
-- `common` provides several Android-related 
+- `common` provides several Android-related utlities such as Context and Cursor extensions, as well as a repository to read contacts from the Android system.
 - `logging` allows writing logs to local files.
 - `network` provides a simplified wrapper over Android's `ConnectivityManager` class to handle network state monitoring, with handling for multiple different versions of Android.
 - `permissions` provides a simplified abstraction for checking the state of Android permissions. 
@@ -330,7 +330,7 @@ This module provides commonly used structures and utilities to be used throughou
   - `SynchronizedCache` is a wrapper over other caches to implement thread safe operations.
 - `validation` provides abstractions for validation results, similar to Kotlin's `Result` class.
 - `mail` provides e-mail address and domain data classes, as well as constants for e-mail protocols and common tokens. These can all be migrated to the `mail` module to organize related components together.
-- `net` provides value class to wrap values into validated Domain, Host and Port classes.
+- `net` provides value classes to wrap values into validated Domain, Host and Port classes.
 - `oauth` provides classes to represent OAuth configurations as well as relevant factory and provider interfaces.
 - `provider` provides interfaces to allow the apps to provide basic information such as app name and brand name.
 
@@ -439,7 +439,7 @@ This module provides customized versions of specific AndroidX components to supp
 
 - `ItemTouchHelper` is a fork of RecyclerView's `ItemTouchHelper` to support swipe gestures that do not remove the swiped item in a list
 - `LinearLayoutManager` is a fork of RecyclerView's `LinearLayoutManager` to update the anchored view when the list is currently scrolled to the top and a new item is added to the top of the list. The existing `LinearLayoutManager` retains the same scroll position, so the new item won't be immediately visible.
-- `ToolbarBottomSheet` is a fork of `BottomSheetDialogFragment` to support showing a Toolbar when the sheet if fully expanded.
+- `ToolbarBottomSheet` is a fork of `BottomSheetDialogFragment` to support showing a Toolbar when the sheet is fully expanded.
 
 ### Library
 This module contains two submodules: `html-cleaner` and `TokenAutoComplete`
@@ -608,7 +608,7 @@ fun CreateAccountScreen(
 There are numerous advantages with this pattern, notably:
 
 1. **The actions and reactions of the screen are clearly defined.** Each `Event` and `Effect` must be declared by it associated contract. This can help with clarity when checking what the capabilities and expected outputs are.
-2. **Events and Effects are consolidated in one place.** Events are handled by the ViewModels `onEvent` method, and Effects are handled by the screen observing with `val (state, dispatch) = viewModel.observe {}`. This makes it quick to find the entry/exit point of a code path.
+2. **Events and Effects are consolidated in one place.** Events are handled by the ViewModel's `onEvent` method, and Effects are handled by the screen observing with `val (state, dispatch) = viewModel.observe {}`. This makes it quick to find the entry/exit point of a code path.
 3. **Simplified UI Testing.** As the composables now take in a relatively simple interface, it is much simpler to create Fakes of the ViewModel contracts.
 4. **Reduction in callback parameters.** Rather than passing a unique lambda function for each action the user can take, we can pass a single `dispatch: (Event) -> Unit` argument. For example:
     ```kotlin
@@ -686,7 +686,7 @@ fun `cache expires after 5 minutes`() {
 ## Jetpack Compose
 
 ### Previews
-Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. This means that when we build the `release` version of the app, no previews are included in the final APK, resulting in smaller file sizes.
+Previews of composables are not located in the same file as the composable they are showcasing. Instead, previews are located in the `debug` build type folder. The intention behind this is so that when we build the `release` version of the app, no previews are included in the final APK, resulting in smaller file sizes. However, previews are not included in the final APK when using ProGuard, so this implementation may be unnecessary and the previews may be better organised in the same file as their content.
 
 ### PreviewDevices
 Annotation class to collate multipe preview annotations into one, allowing previews to show their layouts on multiple devices from small phones up to desktop size screens. This allows the developer to apply one preview annotation and output multiple previews.
