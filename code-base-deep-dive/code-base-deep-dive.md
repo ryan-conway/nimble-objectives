@@ -184,7 +184,7 @@ graph
     widget["widget"]
 ```
 
-`TODO expand on features?`
+Each feature makes use of the MVI architecture, which is deeper dived in the [Points of Interest](#mvi-architecture) section below
 
 ## Mail modules
 The Mail modules are the most foundational modules of the app, responsible for handling mail messages and interacting with different email protocols
@@ -372,7 +372,11 @@ This module contains classes that hold folder information, as well as an enum de
 ### UI
 This module provides UI for both legacy XML approaches and the modern Jetpack Compose approach. 
 
+#### Legacy
+
 For Legacy UI, the module provides an `Icons` object to wrap the XML icons into a more readable format, as well as XML files containing the theme data for both k9mail and thunderbird.
+
+#### Jetpack Compose
 
 For Jetpack Compose, the module provides much more utility. Compared to the relatively barebones Legacy UI module, this module provides:
 
@@ -382,6 +386,8 @@ For Jetpack Compose, the module provides much more utility. Compared to the rela
   - **Molecules** are composables that are slightly more complex than atoms: They generally combine multple atoms into a single reusable component such as `CheckboxInput`.
   - **Organisms** are generally more complex than molecules and typically override from Material components, such as `AlertDialog` or `NavigationDrawerItem`
 - Extensions and utility methods to assist with composable styling, previews, preferences and navigation
+
+The module also defines `BaseViewModel` and `UnidirectionalViewModel`, which the Feature ViewModels implement. This will be deeper dived in the [Points of Interest](#mvi-architecture) section below
 
 ### Others
 There are several other minor though equally important submodules in the `core` module. The `preferences` module is concerned with user settings storage. The `outcome` module provides an `Outcome` wrapper class to identify success and failure states (Similar to Kotlin's `Result` class). The `testing` module provides test utilities similar to the other test modules.
@@ -503,6 +509,120 @@ fun `all general notification IDs are unique`() {
     assertThat(notificationIds).containsNoDuplicates()
 }
 ```
+
+## MVI Architecture
+
+The Feature modules make use of the MVI architecture, the foundation of which is defined by `BaseViewModel` and `UnidirectionalViewModel`, as well as a third `Contract` class defined by each ViewModel.
+
+### UnidirectionalViewModel
+
+The `UnidirectionalViewModel` interface has three type arguments: 
+- `STATE` represents the state of the data to be displayed. It differs from the typical MVVM implementation in that the data presented to the screen is wrapped in a single object, while MVVM allows for multiple streams of data to be observed at once.
+- `EVENT` represents calls to action, typically through user events such as tapping a button, but may also be from other sources such as receiving a push notification or an update to network connectivity.
+- `EFFECT` represents the outcome of a particular event. For example, after creating an account with `Event.CreateAccount`, the ViewModel may emit `Effect.NavigateNext` on success or `Effect.ShowError` on failure.
+
+### BaseViewModel
+
+`BaseViewModel` is an abstract `ViewModel` class that implements `UnidirectionalViewModel` and handles basic functionality to manage state and emit effects. It also provides an implementation for handling one-time events.
+
+### Contracts
+
+ViewModels make use of these in conjunction with a third interface as a contract. Each ViewModel defines its own contract, with the following common structure:
+
+```kotlin
+interface Contract {
+    interface ViewModel: UnidirectionalViewModel<State, Event, Effect>
+
+    data class State(
+        val someStateValue: String,
+    )
+
+    sealed interface Event {
+        data object SomeEvent: Event
+    }
+
+    sealed interface Effect {
+        data object SomeEvent: Effect
+    }
+}
+```
+
+### Usage
+
+As an example, the Create Account feature would define a `CreateAccountContract` with definitions of the expected state, events, and effects: 
+
+```kotlin
+interface CreateAccountContract {
+    interface ViewModel : UnidirectionalViewModel<State, Event, Effect>
+    data class State(
+        val isLoading: Boolean = true,
+        val error: Error? = null,
+    )
+    sealed interface Event {
+        data object CreateAccount : Event
+        data object OnBackClicked : Event
+    }
+    sealed interface Effect {
+        data class NavigateNext(val accountUuid: AccountUuid) : Effect
+        data object NavigateBack : Effect
+    }
+}
+```
+
+We would then construct the `CreateAccountViewModel` class extending both `BaseViewModel` and `CreateAccountContract` as follows:
+```kotlin
+class CreateAccountViewModel(
+    initialState: State = State(),
+) : BaseViewModel<State, Event, Effect>(initialState), 
+    CreateAccountContract.ViewModel {
+        override fun event(event: Event) {
+            when (event) {
+                Event.OnBackClicked -> emitEffect(Effect.NavigateBack)
+                Event.CreateAccount -> { /*TODO*/ }
+            }
+        }
+    }
+```
+
+This is then observed from the `CreateAccountScreen`:
+```kotlin
+@Composable
+fun CreateAccountScreen(
+    onBack: () -> Unit,
+    viewModel: CreateAccountContract.ViewModel,
+) {
+    val (state, dispatch) = viewModel.observe { effect -> 
+        when (effect) {
+            Effect.navigateBack -> onBack()
+        }
+    }
+
+    CreateAccountContent(
+        state = state,
+        onClickBack = { dispatch(Event.onBackClicked) }
+    )
+}
+```
+
+### Benefits
+
+There are numerous advantages with this pattern, notably:
+
+1. **The actions and reactions of the screen are clearly defined.** Each `Event` and `Effect` must be declared by it associated contract. This can help with clarity when checking what the capabilities and expected outputs are.
+2. **Events and Effects are consolidated in one place.** Events are handled by the ViewModels `onEvent` method, and Effects are handled by the screen observing with `val (state, dispatch) = viewModel.observe {}`. This makes it quick to find the entry/exit point of a code path.
+3. **Simplified UI Testing.** As the composables now take in a relatively simple interface, it is much simpler to create Fakes of the ViewModel contracts.
+4. **Reduction in callback parameters.** Rather than passing a unique lambda function for each action the user can take, we can pass a single `dispatch: (Event) -> Unit` argument. For example:
+    ```kotlin
+    SettingsScreenContent(
+        dispatch: (SettingsContract.Event) -> Unit,
+    )
+    // VS
+    SettingsScreenContent(
+        onClickProfile: () -> Unit,
+        onClickSecurity: () -> Unit,
+        onClickHelp: () -> Unit,
+        // ... Other events
+    )
 
 ## Specific Classes and Files
 
